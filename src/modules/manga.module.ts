@@ -1,10 +1,10 @@
 import Hapi from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import Joi from '@hapi/joi';
+import Cryptiles from '@hapi/cryptiles';
 
 import fs from 'fs';
 import { promisify } from 'util';
-import UUID from 'uuid/v4';
 
 import Manga, { IManga } from '../models/Manga';
 import environment from '../environment';
@@ -229,7 +229,7 @@ export default async (server: Hapi.Server) => {
       manga.pageURLs = manga.pageURLs.concat(await Promise.all(files.map(async (file, i) => {
         const ext = exts[i];
 
-        const mangaPage = hexToBase64(UUID()) + '.' + ext;
+        const mangaPage = Cryptiles.randomString(22) + '.' + ext;
         await new Promise((res, rej) => {
           const write = fs.createWriteStream(container + '/' + mangaPage);
           write.on('error', rej);
