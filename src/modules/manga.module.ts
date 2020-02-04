@@ -66,6 +66,7 @@ export default async (server: Hapi.Server) => {
         })
           .limit(+req.query.limit)
           .skip(+req.query.skip)
+          .sort({ _id: -1 })
           .populate('mangaId')
         ).map((favorites) => (favorites.mangaId as IManga).view());
       }
@@ -76,13 +77,27 @@ export default async (server: Hapi.Server) => {
         // tslint:disable-next-line: no-non-null-assertion
         query.ownerID = req.auth.credentials!.user!.id;
       }
-      return (await Manga.find(query).limit(+req.query.limit).skip(+req.query.skip)).map((manga) => manga.view());
+      if (req.query.search) {
+        // TODO escape string
+
+        // tslint:disable-next-line: no-non-null-assertion
+        query.title = new RegExp(req!.query!.search as any, 'i');
+      }
+
+      return (await Manga.find(query)
+        .limit(+req.query.limit)
+        .skip(+req.query.skip)
+        .sort({ _id: -1 })
+      )
+        .map((manga) => manga.view());
     },
     options: {
       validate: {
         query: Joi.object({
           created: Joi.boolean().truthy(''),
           favorite: Joi.boolean().truthy(''),
+          search: Joi.string(),
+
           limit: Joi.number().integer().default(0),
           skip: Joi.number().integer().default(0)
         })
@@ -370,7 +385,7 @@ export default async (server: Hapi.Server) => {
       validate: {
         params: Joi.object({
           id: JoiID.required(),
-          file: Joi.string().regex(/^[a-z0-9-+]+\.[a-z]+$/i).required()
+          file: Joi.string().regex(/^([a-z0-9_-]+)\.([a-z0-9]+)$/i).required()
         }).required(),
       }
     }
