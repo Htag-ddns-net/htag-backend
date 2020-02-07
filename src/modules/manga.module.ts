@@ -92,6 +92,11 @@ export default async (server: Hapi.Server) => {
         .map((manga) => manga.view());
     },
     options: {
+      // Swagger
+      description: 'List manga',
+      tags: ['api', 'manga'],
+
+      // Options
       validate: {
         query: Joi.object({
           created: Joi.boolean().truthy(''),
@@ -126,6 +131,11 @@ export default async (server: Hapi.Server) => {
       }
     },
     options: {
+      // Swagger
+      description: 'Get manga',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'optional'
       },
@@ -167,6 +177,11 @@ export default async (server: Hapi.Server) => {
       }
     },
     options: {
+      // Swagger
+      description: 'Favorite manga',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -197,6 +212,11 @@ export default async (server: Hapi.Server) => {
       return manga.view();
     },
     options: {
+      // Swagger
+      description: 'Create manga',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -212,16 +232,17 @@ export default async (server: Hapi.Server) => {
     method: 'POST',
     path: '/manga/{id}/upload',
     handler: async (req, h) => {
+      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
       const files = toArray((req.payload as any).file)
-        .sort((a, b) => a.hapi.filename.localeCompare(b.hapi.filename));
+        .sort((a, b) => collator.compare(a.hapi.filename, b.hapi.filename));
 
       const exts: string[] = new Array(files.length);
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         // Get file extension
-        const ext = file.hapi.filename.substr(file.hapi.filename.lastIndexOf('.') + 1);
-        if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg' && ext !== 'gif') {
-          return Boom.badData('Invalid file format' + ext);
+        const ext: string = file.hapi.filename.substr(file.hapi.filename.lastIndexOf('.') + 1);
+        if (!['png', 'jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi', 'gif', 'webp'].includes(ext.toLocaleLowerCase())) {
+          return Boom.badData('Invalid file format .' + ext);
         }
         exts[i] = ext;
       }
@@ -261,6 +282,16 @@ export default async (server: Hapi.Server) => {
       return manga.view();
     },
     options: {
+      // Swagger
+      description: 'Upload manga page',
+      tags: ['api', 'manga'],
+      plugins: {
+        'hapi-swagger': {
+          payloadType: 'form'
+        }
+      },
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -273,6 +304,13 @@ export default async (server: Hapi.Server) => {
       },
 
       validate: {
+        payload: Joi.object({
+          file: Joi.array()
+            .single()
+            .items(Joi.any())
+            .meta({ swaggerType: 'file' })
+            .description('Manga Pictures')
+        }),
         params: Joi.object({
           id: JoiID.required()
         }).required(),
@@ -310,6 +348,11 @@ export default async (server: Hapi.Server) => {
       return manga.view();
     },
     options: {
+      // Swagger
+      description: 'Update manga',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -344,6 +387,11 @@ export default async (server: Hapi.Server) => {
       return manga.view();
     },
     options: {
+      // Swagger
+      description: 'Delete manga',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -378,6 +426,11 @@ export default async (server: Hapi.Server) => {
       return manga.view();
     },
     options: {
+      // Swagger
+      description: 'Delete manga page',
+      tags: ['api', 'manga'],
+
+      // Options
       auth: {
         mode: 'required'
       },

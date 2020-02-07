@@ -1,5 +1,8 @@
 require('dotenv').config();
 import Hapi from '@hapi/hapi';
+import Inert from '@hapi/inert';
+import Vision from '@hapi/vision';
+import HapiSwagger from 'hapi-swagger';
 
 import mongoose, { mongo } from 'mongoose';
 
@@ -23,6 +26,32 @@ const server = new Hapi.Server({
 //
 
 const start = async () => {
+  const swaggerOptions: HapiSwagger.RegisterOptions = {
+    info: {
+      title: 'API Documentation',
+      version: 'v0.1',
+    },
+    grouping: 'tags',
+
+    // Disable swagger UI
+    // swaggerUI: false,
+    // documentationPage: false,
+
+    // Get host from BASE_URL
+    schemes: [environment.BASE_URL.split('://')[0]],
+    host: environment.BASE_URL.split('/')[2],
+    basePath: '/' + environment.BASE_URL.split('/').slice(3).join('/')
+  };
+
+  await server.register([
+    Inert,
+    Vision,
+  ]);
+  await server.register({
+    plugin: HapiSwagger,
+    options: swaggerOptions
+  });
+
   console.log(`Registering modules: `);
   await authModule(server);
   await mangaModule(server);

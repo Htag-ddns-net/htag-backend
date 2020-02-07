@@ -67,6 +67,11 @@ export default async (server: Hapi.Server) => {
       return user.view();
     },
     options: {
+      // Swagger
+      description: 'Registers the user',
+      tags: ['api', 'auth'],
+
+      // Options
       auth: { mode: 'try' },
       validate: {
         payload: Joi.object({
@@ -91,6 +96,11 @@ export default async (server: Hapi.Server) => {
       return user.view();
     },
     options: {
+      // Swagger
+      description: 'Logges in the user',
+      tags: ['api', 'auth'],
+
+      // Options
       auth: { mode: 'try' },
       validate: {
         payload: Joi.object({
@@ -109,6 +119,11 @@ export default async (server: Hapi.Server) => {
       return { success: true };
     },
     options: {
+      // Swagger
+      description: 'Logges out the user',
+      tags: ['api', 'auth'],
+
+      // Options
       auth: {
         mode: 'required'
       },
@@ -125,6 +140,11 @@ export default async (server: Hapi.Server) => {
       return user.view();
     },
     options: {
+      // Swagger
+      description: 'Info about the currently loggen in user',
+      tags: ['api', 'auth'],
+
+      // Options
       auth: {
         mode: 'required'
       },
